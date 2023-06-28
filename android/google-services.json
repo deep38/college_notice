@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "694407226020",
+    "project_id": "college-notice-ee7ad",
+    "storage_bucket": "college-notice-ee7ad.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:694407226020:android:793c64df03eff40a9dbc31",
+        "android_client_info": {
+          "package_name": "com.example.college_notice"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "694407226020-1jqfepkrjs4hh4n0bjsohpotutgcg8rs.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB0fgKxE0tvu2p3T4IGbCUB1O5FAdF_Kc4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "694407226020-1jqfepkrjs4hh4n0bjsohpotutgcg8rs.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "694407226020-b1ei7lgssc8rv1mfptat4tj9o40t7roe.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.collegeNotice"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
