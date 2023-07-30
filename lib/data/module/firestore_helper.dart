@@ -122,10 +122,19 @@ class FirestoreHelper {
         .snapshots();
   }
 
-    Stream<QuerySnapshot<Map<String, dynamic>>> getNoticeStreamForSubject(String subject) {
+  Stream<QuerySnapshot<Map<String, dynamic>>> getNoticeStreamForSubject(String subject) {
     return firebaseFirestore
         .collection('notice')
         .where('subject', isEqualTo: subject)
+        .orderBy('dateTime', descending: true)
+        .snapshots();
+  }
+
+  Stream<QuerySnapshot<Map<String, dynamic>>> getNoticeStreamForAllSubject(List<String> subjects) {
+    return firebaseFirestore
+        .collection('notice')
+        .where('subject', whereIn: subjects)
+        .orderBy('dateTime', descending: true)
         .snapshots();
   }
 

@@ -6,6 +6,8 @@ import 'package:college_notice/widgets/notice_list.dart';
 import 'package:college_notice/widgets/notice_list_stream_widget.dart';
 import 'package:flutter/material.dart';
 
+// enum _NoticeViewMode { subjectVise, dateVise }
+
 class NoticeListPage extends StatefulWidget {
   const NoticeListPage({super.key});
 
@@ -19,6 +21,8 @@ class _NoticeListPageState extends State<NoticeListPage>
   FirestoreHelper firestoreHelper = FirestoreHelper();
   SharedPrefsHelper sharedPrefsHelper = SharedPrefsHelper();
 
+  late bool _subjectVise;
+
   List<String>? subjects;
   String? previousSubject;
   int currentTab = 0;
@@ -28,14 +32,19 @@ class _NoticeListPageState extends State<NoticeListPage>
     super.initState();
     String? collegeId = sharedPrefsHelper.getCollegeId();
     String? departmentId = sharedPrefsHelper.getDepartmentId();
+
+    _subjectVise = true;
+
     subjects = sharedPrefsHelper
         .getSubscribedSubjects()
         .map((e) => generateTopicName(collegeId!, departmentId!, e))
         .toList();
-    debugPrint("Init subjects $subjects");
+
     tabController = TabController(
-        initialIndex: currentTab, length: subjects!.length, vsync: this);
-    debugPrint("Init tabcontroller length ${tabController.length}");
+      initialIndex: currentTab,
+      length: subjects!.length,
+      vsync: this,
+    );
 
     tabController.addListener(onTabChange);
   }
@@ -45,25 +54,45 @@ class _NoticeListPageState extends State<NoticeListPage>
     return Scaffold(
       appBar: AppBar(
         title: const Text("Notice Board"),
+        actions: [
+          IconButton(
+            onPressed: () {
+              setState(() {
+                _subjectVise = !_subjectVise;
+              });
+            },
+            icon: Icon(
+              _subjectVise
+              ? Icons.date_range_rounded
+              : Icons.subject_rounded
+            ),
+          )
+        ],
         bottom: subjects != null
-            ? TabBar(
-                isScrollable: true,
-                controller: tabController,
-                tabs: subjects!
-                    .map(
-                      (subject) => Tab(
-                        text: subject.split('-').last,
-                      ),
-                    )
-                    .toList(),
-              )
+            ? _subjectVise
+                ? TabBar(
+                    isScrollable: true,
+                    controller: tabController,
+                    tabs: subjects!
+                        .map(
+                          (subject) => Tab(
+                            text: subject.split('-').last,
+                          ),
+                        )
+                        .toList(),
+                  )
+                : null
             : null,
       ),
       body: subjects != null
-          ? TabBarView(
-            controller: tabController,
-            children: subjects!.map((subject) => NoticeListStream(subject: subject)).toList()
-          )
+          ? _subjectVise
+              ? TabBarView(
+                  controller: tabController,
+                  children: subjects!
+                      .map((subject) => NoticeListStream(subject: subject))
+                      .toList(),
+                )
+              : _buildDateVise()
           : const Center(
               child: Text("No subjects selected"),
             ),
@@ -109,6 +138,46 @@ class _NoticeListPageState extends State<NoticeListPage>
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildDateVise() {
+    final noticeListStream =
+        FirestoreHelper().getNoticeStreamForAllSubject(subjects!);
+    return StreamBuilder(
+      stream: noticeListStream,
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return _buildMessage(snapshot.error?.toString() ?? "Unknown error", Colors.red);
+        }
+
+        if(snapshot.hasData) {
+          final noticeList = snapshot.data!.docs
+              .map((e) => Notice.fromFirebaseMap(e.id, e.data()))
+              .toList();
+          return noticeList.isNotEmpty
+            ? NoticeList(
+              // key: Key(genereateRandomKey(10)),
+              noticeList: noticeList,
+            )
+            : _buildMessage("No notice for you");
+        }
+
+        return const Center(
+          child: CircularProgressIndicator.adaptive(),
+        );
+      },
+    );
+  }
+
+  Widget _buildMessage(String message, [Color color = Colors.black]) {
+    return Center(
+      child: Text(
+        message,
+        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+          color: color,
+        ),
+      ),
     );
   }
 
